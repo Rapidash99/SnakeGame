@@ -4,8 +4,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import vyacheslav.vasilev.Direction._
 
-//комменты
-
 class GameUISpec extends AnyFlatSpec with Matchers {
   val n = 5
 
