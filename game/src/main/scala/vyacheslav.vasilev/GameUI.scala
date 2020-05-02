@@ -1,7 +1,9 @@
 package vyacheslav.vasilev
 
 import java.awt.event.ActionEvent
+
 import javax.swing.Timer
+
 import scala.swing._
 
 object Timer {
@@ -9,14 +11,22 @@ object Timer {
 }
 
 class GameUI(var n: Int, var snake: Snake, var apple: Apple) extends MainFrame {
-  var paused = true
   title = "SnakeGame"
-
-  val canvas: Canvas = new Canvas(n, snake, apple)
+  val canvas: Canvas        = new Canvas(n, snake, apple)
   val newGameButton: Button = Button("New Game") { publish(RestartGameEvent()) }
-  val scoreLabel: Label = new Label("Score: 0")
-  val quitButton: Button = Button("Quit") (sys.exit(0))
-  val pausedLabel: Label = new Label("Paused. Press \"Space\"")
+  val scoreLabel: Label     = new Label("Score: 0")
+  val quitButton: Button    = Button("Quit")(sys.exit(0))
+  val pausedPanel: BoxPanel = new BoxPanel(Orientation.Vertical) {
+    contents += new Label("Paused")
+    contents += new Label("Press \"Space\" to continue")
+  }
+  val finalScoreLabel: Label = new Label("Final score: 0")
+  val gameOverPanel: BoxPanel = new BoxPanel(Orientation.Vertical) {
+    contents += new Label("Game Over")
+    contents += finalScoreLabel
+    contents += new Label("Press \"Space\" to continue")
+    contents += new Label("Click \"New Game\" to restart")
+  }
   val buttonLine: BoxPanel = new BoxPanel(Orientation.Horizontal) {
     contents += newGameButton
     contents += Swing.HGlue
@@ -25,11 +35,16 @@ class GameUI(var n: Int, var snake: Snake, var apple: Apple) extends MainFrame {
     contents += quitButton
     border = Swing.EmptyBorder(5, 5, 5, 5)
   }
+  var paused = true
+
+  gameOverPanel.visible = false
+  var finished = false
 
   restrictHeight(buttonLine)
 
   contents = new BoxPanel(Orientation.Vertical) {
-    contents += pausedLabel
+    contents += pausedPanel
+    contents += gameOverPanel
     contents += canvas
     contents += Swing.VStrut(10)
     contents += buttonLine
@@ -43,33 +58,49 @@ class GameUI(var n: Int, var snake: Snake, var apple: Apple) extends MainFrame {
     case RestartGameEvent() =>
       restartGame()
     case PauseGameEvent() =>
-      pauseGame()
+      if (finished)
+        continueGame()
+      else
+        pauseGame()
   }
-
-  private def restrictHeight(s: Component): Unit =
-    s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
 
   def pauseGame(): Unit = {
     if (paused) {
-      GameUI.startTimer()
       paused = false
-      pausedLabel.visible = false
-    }
-    else {
+      pausedPanel.visible = false
+      GameUI.startTimer()
+    } else {
       GameUI.stopTimer()
       paused = true
-      pausedLabel.visible = true
+      pausedPanel.visible = true
     }
   }
 
+  def endGame(): Unit = {
+    GameUI.stopTimer()
+    paused = true
+    finished = true
+    gameOverPanel.visible = true
+    finalScoreLabel.text = "Final score: %d".format(score())
+  }
+
+  def continueGame(): Unit = {
+    paused = false
+    gameOverPanel.visible = false
+    finished = false
+    GameUI.startTimer()
+    repaint()
+  }
+
   def restartGame(): Unit = {
+    GameUI.stopTimer()
     snake = Snake()
     apple = Apple(n, snake.body)
     canvas.snake = snake
     canvas.apple = apple
     paused = true
-    pausedLabel.visible = true
-    GameUI.stopTimer()
+    pausedPanel.visible = true
+    gameOverPanel.visible = false
     repaint()
     canvas.requestFocus()
   }
@@ -83,13 +114,15 @@ class GameUI(var n: Int, var snake: Snake, var apple: Apple) extends MainFrame {
 
   def score(): Int = snake.body.size - 3
 
+  private def restrictHeight(s: Component): Unit =
+    s.maximumSize = new Dimension(Short.MaxValue, s.preferredSize.height)
 }
 
 object GameUI {
   val timer: Timer = Timer(150)
 
   def main(args: Array[String]): Unit = {
-    val n = 16
+    val n  = 16
     val ui = new GameUI(n, Snake(), Apple(n, Snake.defaultBody()))
     ui.visible = true
 
@@ -98,19 +131,17 @@ object GameUI {
         if (ui.snake.willEat(ui.apple)) {
           ui.snake = ui.snake.move(grow = true)
           ui.apple = Apple(n, ui.snake.body)
-        }
-        else
+        } else
           ui.snake = ui.snake.move(grow = false)
         ui.repaint()
-      }
-      else
-        timer.stop()
+      } else
+        ui.endGame()
     }
 
     timer.addActionListener((_: ActionEvent) => op())
   }
 
-  def startTimer(): Unit = timer.start()
-  def stopTimer(): Unit = timer.stop()
+  def startTimer(): Unit   = timer.start()
+  def stopTimer(): Unit    = timer.stop()
   def restartTimer(): Unit = timer.restart()
 }
