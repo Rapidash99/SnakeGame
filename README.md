@@ -31,7 +31,7 @@ It's a classical snake game written on the Scala language
 1. Write "test"
 1. Probably, it doesn't work, so run them by hands. 
 You may find them at SnakeGame.game.src.test.scala.vyacheslav.vasilev
-## Gameplay gif:
+## Gameplay:
 ![gif](https://s6.gifyu.com/images/gameplayb147551d307509a0.gif)
 ##### Vyacheslav Vasilev
 ##### B17-SE-02
