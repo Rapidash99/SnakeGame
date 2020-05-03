@@ -31,10 +31,8 @@ It's a classical snake game written on the Scala language
 1. Write "test"
 1. Probably, it doesn't work, so run them by hands. 
 You may find them at SnakeGame.game.src.test.scala.vyacheslav.vasilev
-## Gameplay screenshots:
-![scr1](https://i.paste.pics/3e1416948b14cd448f2a85902c50b4e3.png)
-![scr2](https://i.paste.pics/55fbd63e080638ce56defc695df5ed39.png)
-![scr3](https://i.paste.pics/320b0796502345f7feab27ea08473603.png)
+## Gameplay gif:
+![gif](https://s6.gifyu.com/images/gameplayb147551d307509a0.gif)
 ##### Vyacheslav Vasilev
 ##### B17-SE-02
 ##### Innopolis University
